@@ -1,65 +1,95 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
   <defs>
-    <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#f8fafc"/>
-      <stop offset="1" stop-color="#eef2f7"/>
+    <radialGradient id="skinBack" cx="50%" cy="28%" r="82%">
+      <stop offset="0%" stop-color="#f7f3ee"/>
+      <stop offset="55%" stop-color="#efe7df"/>
+      <stop offset="100%" stop-color="#e6dbd1"/>
+    </radialGradient>
+
+    <linearGradient id="shadeBack" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000" stop-opacity="0.08"/>
+      <stop offset="55%" stop-color="#000" stop-opacity="0.00"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.10"/>
     </linearGradient>
+
     <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#000000" flood-opacity="0.10"/>
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#000" flood-opacity="0.14"/>
+    </filter>
+
+    <filter id="grain" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch" />
+      <feColorMatrix type="matrix"
+        values="0 0 0 0 0
+                0 0 0 0 0
+                0 0 0 0 0
+                0 0 0 .03 0"/>
     </filter>
   </defs>
 
   <g filter="url(#softShadow)">
-    <!-- 头 -->
-    <path d="M300 80
-             C270 80 250 105 250 135
-             C250 165 270 190 300 190
-             C330 190 350 165 350 135
-             C350 105 330 80 300 80Z"
-          fill="url(#skin)" stroke="#cbd5e1" stroke-width="2"/>
+    <path id="body-outline-back"
+      d="M300 70
+         C264 70 238 99 238 136
+         C238 171 261 198 300 198
+         C339 198 362 171 362 136
+         C362 99 336 70 300 70 Z
 
-    <!-- 躯干背面 -->
-    <path d="M270 190
-             C255 230 255 265 265 300
-             C235 330 220 380 230 445
-             C240 520 250 600 255 660
-             C260 735 280 785 300 820
-             C320 785 340 735 345 660
-             C350 600 360 520 370 445
-             C380 380 365 330 335 300
-             C345 265 345 230 330 190Z"
-          fill="url(#skin)" stroke="#cbd5e1" stroke-width="2"/>
+         M260 196
+         C246 232 246 271 258 308
+         C226 341 210 398 222 468
+         C236 550 246 642 250 706
+         C254 782 276 828 300 862
+         C324 828 346 782 350 706
+         C354 642 364 550 378 468
+         C390 398 374 341 342 308
+         C354 271 354 232 340 196 Z
 
-    <!-- 左臂 -->
-    <path d="M235 305
-             C205 320 185 350 175 395
-             C165 445 170 520 190 590
-             C205 640 235 670 252 650
-             C248 600 240 520 230 445
-             C222 390 225 340 235 305Z"
-          fill="url(#skin)" stroke="#cbd5e1" stroke-width="2"/>
+         M230 314
+         C202 330 178 366 166 416
+         C152 475 156 556 178 634
+         C195 694 226 748 250 734
+         C244 660 236 572 222 468
+         C212 395 215 344 230 314 Z
 
-    <!-- 右臂 -->
-    <path d="M365 305
-             C395 320 415 350 425 395
-             C435 445 430 520 410 590
-             C395 640 365 670 348 650
-             C352 600 360 520 370 445
-             C378 390 375 340 365 305Z"
-          fill="url(#skin)" stroke="#cbd5e1" stroke-width="2"/>
+         M370 314
+         C398 330 422 366 434 416
+         C448 475 444 556 422 634
+         C405 694 374 748 350 734
+         C356 660 364 572 378 468
+         C388 395 385 344 370 314 Z
 
-    <!-- 腿 -->
-    <path d="M265 660
-             C255 720 245 780 235 835
-             C230 860 250 875 270 865
-             C292 852 300 820 300 820
-             C300 820 308 852 330 865
-             C350 875 370 860 365 835
-             C355 780 345 720 335 660Z"
-          fill="url(#skin)" stroke="#cbd5e1" stroke-width="2"/>
+         M258 706
+         C248 774 238 828 230 862
+         C224 884 244 898 266 889
+         C290 879 300 854 300 854
+         C300 854 310 879 334 889
+         C356 898 376 884 370 862
+         C362 828 352 774 342 706 Z"
+      fill="url(#skinBack)" stroke="#b9aba0" stroke-width="2.2" stroke-linejoin="round"/>
+
+    <path
+      d="M260 196
+         C246 232 246 271 258 308
+         C226 341 210 398 222 468
+         C236 550 246 642 250 706
+         C254 782 276 828 300 862
+         C324 828 346 782 350 706
+         C354 642 364 550 378 468
+         C390 398 374 341 342 308
+         C354 271 354 232 340 196 Z"
+      fill="url(#shadeBack)" opacity="0.55"/>
+
+    <!-- 背部教材线条：肩胛/脊柱沟（很淡） -->
+    <g stroke="#6b5c52" stroke-opacity="0.22" stroke-width="2" fill="none">
+      <path d="M300 210 L300 845" stroke-opacity="0.20"/>
+      <path d="M260 300 C275 325 285 350 292 370" stroke-opacity="0.14"/>
+      <path d="M340 300 C325 325 315 350 308 370" stroke-opacity="0.14"/>
+      <path d="M252 420 C270 440 285 455 295 470" stroke-opacity="0.10"/>
+      <path d="M348 420 C330 440 315 455 305 470" stroke-opacity="0.10"/>
+      <path d="M255 610 C275 630 325 630 345 610" stroke-opacity="0.12"/>
+    </g>
+
+    <rect x="0" y="0" width="600" height="900" filter="url(#grain)" opacity="0.7"/>
   </g>
-
-  <!-- 背面脊柱引导线（极淡） -->
-  <path d="M300 190 L300 820" stroke="#94a3b8" stroke-opacity="0.18" stroke-width="2"/>
-  <path d="M270 320 C290 340 310 340 330 320" stroke="#94a3b8" stroke-opacity="0.12" stroke-width="2" fill="none"/>
 </svg>
+
