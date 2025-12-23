@@ -1,72 +1,115 @@
 <svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
   <defs>
-    <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
-      <stop offset="0" stop-color="#f8fafc"/>
-      <stop offset="1" stop-color="#eef2f7"/>
+    <!-- 背景透明：不画背景矩形 -->
+    <radialGradient id="skinFront" cx="50%" cy="30%" r="80%">
+      <stop offset="0%" stop-color="#f7f3ee"/>
+      <stop offset="55%" stop-color="#efe7df"/>
+      <stop offset="100%" stop-color="#e6dbd1"/>
+    </radialGradient>
+
+    <linearGradient id="shadeFront" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#000" stop-opacity="0.08"/>
+      <stop offset="55%" stop-color="#000" stop-opacity="0.00"/>
+      <stop offset="100%" stop-color="#000" stop-opacity="0.10"/>
     </linearGradient>
+
     <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
-      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#000000" flood-opacity="0.10"/>
+      <feDropShadow dx="0" dy="12" stdDeviation="12" flood-color="#000" flood-opacity="0.14"/>
+    </filter>
+
+    <!-- 轻微纸张颗粒感（很淡） -->
+    <filter id="grain" x="-10%" y="-10%" width="120%" height="120%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="2" stitchTiles="stitch" />
+      <feColorMatrix type="matrix"
+        values="0 0 0 0 0
+                0 0 0 0 0
+                0 0 0 0 0
+                0 0 0 .03 0"/>
     </filter>
   </defs>
 
-  <!-- 背景透明：不画背景矩形 -->
-  <!-- 人体轮廓 -->
+  <!-- 人体轮廓（用于 overlay 裁剪，复制 d 到 lib/bodyOutline.js） -->
   <g filter="url(#softShadow)">
-    <path d="M300 80
-             C270 80 250 105 250 135
-             C250 165 270 190 300 190
-             C330 190 350 165 350 135
-             C350 105 330 80 300 80Z"
-          fill="url(#skin)" stroke="#cbd5e1" stroke-width="2"/>
+    <path id="body-outline-front"
+      d="M300 70
+         C264 70 238 99 238 136
+         C238 171 261 198 300 198
+         C339 198 362 171 362 136
+         C362 99 336 70 300 70 Z
 
-    <!-- 颈+躯干 -->
-    <path d="M270 190
-             C260 210 255 235 258 255
-             C262 290 250 320 240 345
-             C225 385 220 435 230 485
-             C242 545 248 595 250 650
-             C252 710 265 760 290 802
-             C300 820 300 820 310 802
-             C335 760 348 710 350 650
-             C352 595 358 545 370 485
-             C380 435 375 385 360 345
-             C350 320 338 290 342 255
-             C345 235 340 210 330 190Z"
-          fill="url(#skin)" stroke="#cbd5e1" stroke-width="2"/>
+         M260 196
+         C248 214 244 236 246 258
+         C250 301 236 333 224 362
+         C206 408 202 466 214 520
+         C228 588 236 646 238 704
+         C241 775 263 823 292 860
+         C302 873 302 873 308 860
+         C337 823 359 775 362 704
+         C364 646 372 588 386 520
+         C398 466 394 408 376 362
+         C364 333 350 301 354 258
+         C356 236 352 214 340 196 Z
 
-    <!-- 左臂 -->
-    <path d="M240 345
-             C210 350 190 370 180 395
-             C165 435 165 485 175 530
-             C185 575 198 615 215 650
-             C225 670 245 670 252 650
-             C245 595 240 545 228 485
-             C220 445 225 395 240 345Z"
-          fill="url(#skin)" stroke="#cbd5e1" stroke-width="2"/>
+         M224 362
+         C196 368 173 392 160 428
+         C144 474 145 539 159 600
+         C172 657 190 708 212 748
+         C226 773 252 772 258 746
+         C250 674 242 604 226 520
+         C214 458 213 407 224 362 Z
 
-    <!-- 右臂 -->
-    <path d="M360 345
-             C390 350 410 370 420 395
-             C435 435 435 485 425 530
-             C415 575 402 615 385 650
-             C375 670 355 670 348 650
-             C355 595 360 545 372 485
-             C380 445 375 395 360 345Z"
-          fill="url(#skin)" stroke="#cbd5e1" stroke-width="2"/>
+         M376 362
+         C404 368 427 392 440 428
+         C456 474 455 539 441 600
+         C428 657 410 708 388 748
+         C374 773 348 772 342 746
+         C350 674 358 604 374 520
+         C386 458 387 407 376 362 Z
 
-    <!-- 腿（简化） -->
-    <path d="M270 650
-             C260 710 250 770 235 835
-             C230 860 250 875 270 865
-             C290 850 305 820 305 820
-             C305 820 320 850 340 865
-             C360 875 380 860 375 835
-             C360 770 350 710 330 650Z"
-          fill="url(#skin)" stroke="#cbd5e1" stroke-width="2"/>
+         M262 704
+         C252 772 240 826 230 862
+         C224 884 244 898 266 889
+         C290 879 302 852 302 852
+         C302 852 314 879 338 889
+         C360 898 380 884 374 862
+         C364 826 352 772 342 704 Z"
+      fill="url(#skinFront)" stroke="#b9aba0" stroke-width="2.2" stroke-linejoin="round"/>
+
+    <!-- 身体体积阴影 -->
+    <path
+      d="M260 196
+         C248 214 244 236 246 258
+         C250 301 236 333 224 362
+         C206 408 202 466 214 520
+         C228 588 236 646 238 704
+         C241 775 263 823 292 860
+         C302 873 302 873 308 860
+         C337 823 359 775 362 704
+         C364 646 372 588 386 520
+         C398 466 394 408 376 362
+         C364 333 350 301 354 258
+         C356 236 352 214 340 196 Z"
+      fill="url(#shadeFront)" opacity="0.55"/>
+
+    <!-- 解剖/肌群提示线（非常淡，偏教材风） -->
+    <g stroke="#6b5c52" stroke-opacity="0.22" stroke-width="2" fill="none">
+      <!-- 颈锁乳突/锁骨带 -->
+      <path d="M250 210 C275 225 325 225 350 210"/>
+      <path d="M270 225 C290 240 310 240 330 225"/>
+      <!-- 胸肌外缘 -->
+      <path d="M240 300 C268 320 332 320 360 300" stroke-opacity="0.18"/>
+      <!-- 腹直肌分段 -->
+      <path d="M300 305 L300 640" stroke-opacity="0.18"/>
+      <path d="M265 360 C280 372 320 372 335 360" stroke-opacity="0.14"/>
+      <path d="M262 430 C280 442 320 442 338 430" stroke-opacity="0.12"/>
+      <path d="M260 500 C280 512 320 512 340 500" stroke-opacity="0.10"/>
+      <!-- 髂前上棘/腹股沟线（中性，无性征） -->
+      <path d="M252 610 C275 630 325 630 348 610" stroke-opacity="0.14"/>
+      <!-- 膝/胫骨提示 -->
+      <path d="M250 760 C270 780 330 780 350 760" stroke-opacity="0.10"/>
+    </g>
+
+    <!-- 纸张颗粒叠层（极淡） -->
+    <rect x="0" y="0" width="600" height="900" filter="url(#grain)" opacity="0.7"/>
   </g>
-
-  <!-- 轻微分区线（极淡） -->
-  <path d="M300 190 L300 820" stroke="#94a3b8" stroke-opacity="0.18" stroke-width="2"/>
-  <path d="M250 300 C280 320 320 320 350 300" stroke="#94a3b8" stroke-opacity="0.12" stroke-width="2" fill="none"/>
-  <path d="M242 520 C270 540 330 540 358 520" stroke="#94a3b8" stroke-opacity="0.10" stroke-width="2" fill="none"/>
 </svg>
