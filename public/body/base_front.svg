@@ -1,0 +1,72 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="900" viewBox="0 0 600 900">
+  <defs>
+    <linearGradient id="skin" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f8fafc"/>
+      <stop offset="1" stop-color="#eef2f7"/>
+    </linearGradient>
+    <filter id="softShadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#000000" flood-opacity="0.10"/>
+    </filter>
+  </defs>
+
+  <!-- 背景透明：不画背景矩形 -->
+  <!-- 人体轮廓 -->
+  <g filter="url(#softShadow)">
+    <path d="M300 80
+             C270 80 250 105 250 135
+             C250 165 270 190 300 190
+             C330 190 350 165 350 135
+             C350 105 330 80 300 80Z"
+          fill="url(#skin)" stroke="#cbd5e1" stroke-width="2"/>
+
+    <!-- 颈+躯干 -->
+    <path d="M270 190
+             C260 210 255 235 258 255
+             C262 290 250 320 240 345
+             C225 385 220 435 230 485
+             C242 545 248 595 250 650
+             C252 710 265 760 290 802
+             C300 820 300 820 310 802
+             C335 760 348 710 350 650
+             C352 595 358 545 370 485
+             C380 435 375 385 360 345
+             C350 320 338 290 342 255
+             C345 235 340 210 330 190Z"
+          fill="url(#skin)" stroke="#cbd5e1" stroke-width="2"/>
+
+    <!-- 左臂 -->
+    <path d="M240 345
+             C210 350 190 370 180 395
+             C165 435 165 485 175 530
+             C185 575 198 615 215 650
+             C225 670 245 670 252 650
+             C245 595 240 545 228 485
+             C220 445 225 395 240 345Z"
+          fill="url(#skin)" stroke="#cbd5e1" stroke-width="2"/>
+
+    <!-- 右臂 -->
+    <path d="M360 345
+             C390 350 410 370 420 395
+             C435 435 435 485 425 530
+             C415 575 402 615 385 650
+             C375 670 355 670 348 650
+             C355 595 360 545 372 485
+             C380 445 375 395 360 345Z"
+          fill="url(#skin)" stroke="#cbd5e1" stroke-width="2"/>
+
+    <!-- 腿（简化） -->
+    <path d="M270 650
+             C260 710 250 770 235 835
+             C230 860 250 875 270 865
+             C290 850 305 820 305 820
+             C305 820 320 850 340 865
+             C360 875 380 860 375 835
+             C360 770 350 710 330 650Z"
+          fill="url(#skin)" stroke="#cbd5e1" stroke-width="2"/>
+  </g>
+
+  <!-- 轻微分区线（极淡） -->
+  <path d="M300 190 L300 820" stroke="#94a3b8" stroke-opacity="0.18" stroke-width="2"/>
+  <path d="M250 300 C280 320 320 320 350 300" stroke="#94a3b8" stroke-opacity="0.12" stroke-width="2" fill="none"/>
+  <path d="M242 520 C270 540 330 540 358 520" stroke="#94a3b8" stroke-opacity="0.10" stroke-width="2" fill="none"/>
+</svg>
