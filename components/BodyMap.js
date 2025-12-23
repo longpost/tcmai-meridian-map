@@ -68,7 +68,7 @@ export default function BodyMap() {
 
           {/* 经络叠层：用 currentColor 控色 */}
           <div style={{ position: "absolute", inset: 0, color }}>
-            <MeridianOverlay activeMeridian={active} />
+            <MeridianOverlay activeMeridian={active} side={side} />
           </div>
 
           {/* 热区：透明按钮，按 viewBox 坐标映射百分比 */}
