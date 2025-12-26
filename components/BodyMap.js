@@ -14,13 +14,18 @@ export default function BodyMap() {
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  // 控制“推理回放/trace”是否展示：默认不展示
+  const [showTrace, setShowTrace] = useState(false);
+  // 用于每次选经络都让 TracePlayer 重置
+  const [traceKey, setTraceKey] = useState(0);
+
   async function fetchAnalysis(m) {
     setLoading(true);
     try {
       const res = await fetch("/api/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ selectedMeridian: m })
+        body: JSON.stringify({ selectedMeridian: m }),
       });
       const data = await res.json();
       setAnalysis(data);
@@ -31,7 +36,7 @@ export default function BodyMap() {
         trace_en: [{ kind: "error", text: String(e?.message || e) }],
         title_zh: "请求失败",
         plain_explain_zh: "无法获取 /api/analyze，请检查部署。",
-        trace_zh: [{ kind: "error", text: String(e?.message || e) }]
+        trace_zh: [{ kind: "error", text: String(e?.message || e) }],
       });
     } finally {
       setLoading(false);
@@ -40,6 +45,10 @@ export default function BodyMap() {
 
   function selectMeridian(m) {
     const key = String(m).toUpperCase();
+
+    // 点经络后再显示 trace
+    setShowTrace(true);
+    setTraceKey((v) => v + 1);
 
     if (key === "BL") {
       setSide("back");
@@ -53,14 +62,14 @@ export default function BodyMap() {
     fetchAnalysis(key);
   }
 
+  // 初始只加载右侧解释，不显示 trace
   useEffect(() => {
-    // initial load
     fetchAnalysis(active);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // 防止 front 还停留 BL
   useEffect(() => {
-    // prevent BL on front
     if (side === "front" && active === "BL") {
       setActive("ST");
       fetchAnalysis("ST");
@@ -87,11 +96,21 @@ export default function BodyMap() {
       ? "Educational information only. Not a diagnosis or medical advice."
       : "⚠️ 仅作健康信息参考，不构成诊断或治疗建议。";
 
+  const traceLabels =
+    lang === "en"
+      ? { title: "Reasoning trace", pause: "Pause", play: "Play", reset: "Reset" }
+      : { title: "推理回放", pause: "暂停", play: "播放", reset: "重置" };
+
+  const traceHint =
+    lang === "en"
+      ? "Click a meridian to show the trace."
+      : "点选任意经络后，才显示推理回放。";
+
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 420px", gap: 16, alignItems: "start" }}>
       <div className="card">
         <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ fontWeight: 900 }}>{lang === "en" ? "Interactive Body Map" : "交互人体图"}</div>
+          <div style={{ fontWeight: 900 }}>{lang === "en" ? "Meridian Map" : "经络图"}</div>
 
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             <button className={`pill ${lang === "en" ? "pillActive" : ""}`} onClick={() => setLang("en")}>
@@ -110,6 +129,7 @@ export default function BodyMap() {
               className={`pill ${side === "back" ? "pillActive" : ""}`}
               onClick={() => {
                 setSide("back");
+                // 切背面不自动开 trace；只有点经络才开
                 if (active !== "BL") {
                   setActive("BL");
                   fetchAnalysis("BL");
@@ -130,10 +150,10 @@ export default function BodyMap() {
             style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
           />
 
+          {/* Overlay 强制在上层 */}
           <div style={{ position: "absolute", inset: 0, zIndex: 20 }}>
             <MeridianOverlay activeMeridian={active} side={side} />
           </div>
-
 
           {HOTSPOTS.map((h) => (
             <HotspotButton
@@ -157,9 +177,7 @@ export default function BodyMap() {
         </div>
 
         <div style={{ height: 8 }} />
-        <div className="smallMuted">
-          {lang === "en" ? "Note: BL is shown on the back view only." : "注：BL 仅在背面显示。"}
-        </div>
+        <div className="smallMuted">{lang === "en" ? "Note: BL is shown on the back view only." : "注：BL 仅在背面显示。"}</div>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -173,15 +191,13 @@ export default function BodyMap() {
           <div className="smallMuted">{disclaimer}</div>
         </div>
 
-        <TracePlayer
-          trace={trace}
-          labels={
-            lang === "en"
-              ? { title: "Reasoning trace", pause: "Pause", play: "Play", reset: "Reset" }
-              : { title: "推理回放", pause: "暂停", play: "播放", reset: "重置" }
-          }
-        />
-
+        {!showTrace ? (
+          <div className="card">
+            <div className="smallMuted">{traceHint}</div>
+          </div>
+        ) : (
+          <TracePlayer key={traceKey} trace={trace} labels={traceLabels} />
+        )}
       </div>
     </div>
   );
@@ -207,7 +223,7 @@ function HotspotButton({ shape, onClick, active, title }) {
         background: active ? "rgba(17,24,39,0.06)" : "transparent",
         border: active ? "1px solid rgba(17,24,39,0.18)" : "1px solid transparent",
         borderRadius: 12,
-        cursor: "pointer"
+        cursor: "pointer",
       }}
     />
   );
