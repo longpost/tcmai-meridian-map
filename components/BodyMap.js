@@ -1,13 +1,14 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import MeridianOverlay from "./MeridianOverlay";
 import TracePlayer from "./TracePlayer";
 import { MERIDIANS } from "../lib/meridians";
 import { HOTSPOTS } from "../lib/hotspots";
 
-const FRONT_MERIDIANS = ["LU", "LI", "ST", "SP", "HT", "SI", "PC", "SJ", "GB", "LV", "KI"]; // front 上先放 11 条
-const BACK_MERIDIANS = ["BL"]; // back 目前只放 BL（你现在的经络图也是这么设计的）
+const FRONT_MERIDIANS = ["LU", "LI", "ST", "SP", "HT", "SI", "PC", "SJ", "GB", "LV", "KI"];
+const BACK_MERIDIANS = ["BL"];
 
 export default function BodyMap() {
+  const [lang, setLang] = useState("en"); // default English
   const [side, setSide] = useState("front");
   const [active, setActive] = useState("ST");
   const [analysis, setAnalysis] = useState(null);
@@ -25,10 +26,12 @@ export default function BodyMap() {
       setAnalysis(data);
     } catch (e) {
       setAnalysis({
-        meridians: [m],
+        title_en: "Request failed",
+        plain_explain_en: "Could not fetch /api/analyze. Check Vercel deployment.",
+        trace_en: [{ kind: "error", text: String(e?.message || e) }],
         title_zh: "请求失败",
-        plain_explain_zh: "无法获取分析结果，请检查 /api/analyze 是否部署成功。",
-        trace: [{ kind: "error", text: String(e?.message || e) }]
+        plain_explain_zh: "无法获取 /api/analyze，请检查部署。",
+        trace_zh: [{ kind: "error", text: String(e?.message || e) }]
       });
     } finally {
       setLoading(false);
@@ -38,7 +41,6 @@ export default function BodyMap() {
   function selectMeridian(m) {
     const key = String(m).toUpperCase();
 
-    // BL 只能背面
     if (key === "BL") {
       setSide("back");
       setActive("BL");
@@ -46,14 +48,19 @@ export default function BodyMap() {
       return;
     }
 
-    // 其它经络默认前面
     setSide("front");
     setActive(key);
     fetchAnalysis(key);
   }
 
-  // 切回 front 时避免停留 BL
   useEffect(() => {
+    // initial load
+    fetchAnalysis(active);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    // prevent BL on front
     if (side === "front" && active === "BL") {
       setActive("ST");
       fetchAnalysis("ST");
@@ -63,25 +70,41 @@ export default function BodyMap() {
 
   const shownMeridians = side === "back" ? BACK_MERIDIANS : FRONT_MERIDIANS;
 
-  // 初始加载一次
-  useEffect(() => {
-    fetchAnalysis(active);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const title =
+    lang === "en"
+      ? analysis?.title_en || MERIDIANS[active]?.nameEn || active
+      : analysis?.title_zh || MERIDIANS[active]?.nameZh || active;
 
-  const title = analysis?.title_zh || (MERIDIANS[active]?.nameZh ?? active);
-  const explain = analysis?.plain_explain_zh || "请选择经络以查看解释。";
-  const trace = analysis?.trace || [];
+  const explain =
+    lang === "en"
+      ? analysis?.plain_explain_en || "Select a meridian to see details."
+      : analysis?.plain_explain_zh || "请选择经络查看说明。";
+
+  const trace = lang === "en" ? analysis?.trace_en || [] : analysis?.trace_zh || [];
+
+  const disclaimer =
+    lang === "en"
+      ? "Educational information only. Not a diagnosis or medical advice."
+      : "⚠️ 仅作健康信息参考，不构成诊断或治疗建议。";
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: 16, alignItems: "start" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 420px", gap: 16, alignItems: "start" }}>
       <div className="card">
         <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between" }}>
-          <div style={{ fontWeight: 900 }}>交互人体图</div>
+          <div style={{ fontWeight: 900 }}>{lang === "en" ? "Interactive Body Map" : "交互人体图"}</div>
 
-          <div style={{ display: "flex", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            <button className={`pill ${lang === "en" ? "pillActive" : ""}`} onClick={() => setLang("en")}>
+              EN
+            </button>
+            <button className={`pill ${lang === "zh" ? "pillActive" : ""}`} onClick={() => setLang("zh")}>
+              中文
+            </button>
+
+            <div style={{ width: 10 }} />
+
             <button className={`pill ${side === "front" ? "pillActive" : ""}`} onClick={() => setSide("front")}>
-              Front
+              {lang === "en" ? "Front" : "正面"}
             </button>
             <button
               className={`pill ${side === "back" ? "pillActive" : ""}`}
@@ -93,7 +116,7 @@ export default function BodyMap() {
                 }
               }}
             >
-              Back
+              {lang === "en" ? "Back" : "背面"}
             </button>
           </div>
         </div>
@@ -103,7 +126,7 @@ export default function BodyMap() {
         <div style={{ position: "relative", width: "100%", maxWidth: 560, margin: "0 auto", aspectRatio: "2 / 3" }}>
           <img
             src={side === "front" ? "/body/base_front.svg" : "/body/base_back.svg"}
-            alt="TCM body"
+            alt="body"
             style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
           />
 
@@ -133,18 +156,20 @@ export default function BodyMap() {
         </div>
 
         <div style={{ height: 8 }} />
-        <div className="smallMuted">注：BL 仅在背面显示；点 BL 会自动切换到背面。</div>
+        <div className="smallMuted">
+          {lang === "en" ? "Note: BL is shown on the back view only." : "注：BL 仅在背面显示。"}
+        </div>
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <div className="card">
           <div style={{ fontSize: 18, fontWeight: 900 }}>
-            {title} {loading ? "（加载中…）" : ""}
+            {title} {loading ? (lang === "en" ? "(Loading…)" : "（加载中…）") : ""}
           </div>
           <div style={{ height: 8 }} />
           <div className="smallMuted">{explain}</div>
           <div style={{ height: 10 }} />
-          <div className="smallMuted">⚠️ 仅作健康信息参考，不构成诊断或治疗建议。</div>
+          <div className="smallMuted">{disclaimer}</div>
         </div>
 
         <TracePlayer trace={trace} />
@@ -178,4 +203,5 @@ function HotspotButton({ shape, onClick, active, title }) {
     />
   );
 }
+
 
