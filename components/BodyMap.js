@@ -130,9 +130,10 @@ export default function BodyMap() {
             style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
           />
 
-          <div style={{ position: "absolute", inset: 0, color: MERIDIANS[active]?.color || "#0ea5e9" }}>
+          <div style={{ position: "absolute", inset: 0, zIndex: 20 }}>
             <MeridianOverlay activeMeridian={active} side={side} />
           </div>
+
 
           {HOTSPOTS.map((h) => (
             <HotspotButton
