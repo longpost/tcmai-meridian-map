@@ -172,7 +172,15 @@ export default function BodyMap() {
           <div className="smallMuted">{disclaimer}</div>
         </div>
 
-        <TracePlayer trace={trace} />
+        <TracePlayer
+          trace={trace}
+          labels={
+            lang === "en"
+              ? { title: "Reasoning trace", pause: "Pause", play: "Play", reset: "Reset" }
+              : { title: "推理回放", pause: "暂停", play: "播放", reset: "重置" }
+          }
+        />
+
       </div>
     </div>
   );
