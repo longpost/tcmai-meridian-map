@@ -1,58 +1,67 @@
-import React, { useEffect, useState } from "react";
+、// components/TracePlayer.js
+import React, { useEffect, useMemo, useRef, useState } from "react";
 
-export default function TracePlayer({ trace = [] }) {
-  const [idx, setIdx] = useState(-1);
-  const [playing, setPlaying] = useState(false);
+export default function TracePlayer({
+  trace = [],
+  labels = {
+    title: "Reasoning trace",
+    pause: "Pause",
+    play: "Play",
+    reset: "Reset"
+  }
+}) {
+  const [running, setRunning] = useState(true);
+  const [idx, setIdx] = useState(0);
+  const timerRef = useRef(null);
+
+  const items = useMemo(() => Array.isArray(trace) ? trace : [], [trace]);
 
   useEffect(() => {
-    if (!playing) return;
-    if (idx >= trace.length - 1) return;
-    const t = setTimeout(() => setIdx((v) => v + 1), 320);
-    return () => clearTimeout(t);
-  }, [playing, idx, trace.length]);
+    if (!running) return;
+    if (idx >= items.length) return;
 
-  useEffect(() => {
-    setIdx(-1);
-    setPlaying(false);
-  }, [JSON.stringify(trace)]);
+    timerRef.current = setTimeout(() => setIdx((v) => v + 1), 650);
+    return () => clearTimeout(timerRef.current);
+  }, [running, idx, items.length]);
 
-  const shown = idx < 0 ? [] : trace.slice(0, idx + 1);
+  function onReset() {
+    setIdx(0);
+    setRunning(true);
+  }
+
+  const shown = items.slice(0, idx);
 
   return (
     <div className="card">
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 10 }}>
-        <div style={{ fontWeight: 800 }}>推理回放</div>
+        <div style={{ fontWeight: 900 }}>{labels.title}</div>
         <div style={{ display: "flex", gap: 8 }}>
-          <button
-            className="pill"
-            onClick={() => setPlaying((v) => !v)}
-            disabled={trace.length === 0}
-            title="播放/暂停"
-          >
-            {playing ? "Pause" : "Play"}
+          <button className="pill" onClick={() => setRunning((v) => !v)}>
+            {running ? labels.pause : labels.play}
           </button>
-          <button
-            className="pill"
-            onClick={() => { setIdx(-1); setPlaying(false); }}
-            disabled={trace.length === 0}
-          >
-            Reset
+          <button className="pill" onClick={onReset}>
+            {labels.reset}
           </button>
         </div>
       </div>
 
       <div style={{ height: 10 }} />
-      {trace.length === 0 ? (
-        <div className="smallMuted">（占位）后端返回 trace[] 后，这里会逐步显示推理步骤。</div>
+
+      {shown.length === 0 ? (
+        <div className="smallMuted" style={{ opacity: 0.8 }}>
+          {items.length ? "…" : "No trace."}
+        </div>
       ) : (
-        <ol style={{ margin: 0, paddingLeft: 18 }}>
-          {shown.map((s, i) => (
-            <li key={i} style={{ marginBottom: 6 }}>
-              <span style={{ fontSize: 14 }}>{s.text}</span>
-              {s.kind ? <span className="smallMuted"> · {s.kind}</span> : null}
-            </li>
+        <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+          {shown.map((t, i) => (
+            <div key={i} style={{ display: "flex", gap: 10 }}>
+              <div className="smallMuted" style={{ minWidth: 76 }}>
+                {t.kind || "step"}
+              </div>
+              <div style={{ lineHeight: 1.35 }}>{t.text}</div>
+            </div>
           ))}
-        </ol>
+        </div>
       )}
     </div>
   );
