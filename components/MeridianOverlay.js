@@ -2,8 +2,8 @@ import React from "react";
 import { MERIDIANS } from "../lib/meridians";
 import { BODY_OUTLINE_FRONT_D, BODY_OUTLINE_BACK_D } from "../lib/bodyOutline";
 
-const USE_CLIP = false; // 先确保可见；确认后再改 true
-const STROKE_WIDTH = 3; // 你要更细就改 2
+const USE_CLIP = true; // 先确保可见；确认后再改 true
+const STROKE_WIDTH = 2; // 你要更细就改 2
 
 function normalizePath(x) {
   if (!x) return null;
