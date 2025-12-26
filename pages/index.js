@@ -1,15 +1,16 @@
+// pages/index.js
 import BodyMap from "../components/BodyMap";
-//import "../styles/globals.css";
 
 export default function Home() {
   return (
-    <main style={{ padding: 16, maxWidth: 1100, margin: "0 auto" }}>
-      <h1 className="hTitle">TCM Meridian Map (Vercel All-in-One)</h1>
-      <div className="smallMuted">
-        点击人体热区 → 高亮经络并播放“描边动画”。右侧显示解释 + 推理 trace 播放器（后续接你现有 AI/规则引擎）。
-      </div>
+    <main style={{ maxWidth: 1100, margin: "0 auto", padding: 24 }}>
+      <h1 style={{ fontSize: 28, fontWeight: 900, margin: "0 0 10px" }}>
+        TCM Meridian Map (Demo)
+      </h1>
 
-      <div style={{ height: 12 }} />
+      <p style={{ margin: "0 0 18px", opacity: 0.75 }}>
+        Click a meridian to highlight its pathway. The right panel shows an educational explanation and a step-by-step “trace” (not a diagnosis).
+      </p>
 
       <BodyMap />
     </main>
