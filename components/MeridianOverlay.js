@@ -1,9 +1,7 @@
 import React from "react";
 import { MERIDIANS } from "../lib/meridians";
-import { BODY_OUTLINE_FRONT_D, BODY_OUTLINE_BACK_D } from "../lib/bodyOutline";
 
-const USE_CLIP = true; // 先确保可见；确认后再改 true
-const STROKE_WIDTH = 2; // 你要更细就改 2
+const STROKE_WIDTH = 2.4; // 你要更细就改 2 或 1.8
 
 function normalizePath(x) {
   if (!x) return null;
@@ -17,14 +15,14 @@ function getSidePaths(m, side) {
   if (v && (v.left || v.right)) {
     return {
       left: (v.left || []).map(normalizePath).filter(Boolean),
-      right: (v.right || []).map(normalizePath).filter(Boolean)
+      right: (v.right || []).map(normalizePath).filter(Boolean),
     };
   }
   const p = m?.paths?.[side];
   if (p && (p.left || p.right)) {
     return {
       left: (p.left || []).map(normalizePath).filter(Boolean),
-      right: (p.right || []).map(normalizePath).filter(Boolean)
+      right: (p.right || []).map(normalizePath).filter(Boolean),
     };
   }
   return { left: [], right: [] };
@@ -34,13 +32,15 @@ export default function MeridianOverlay({ activeMeridian, side }) {
   const m = MERIDIANS?.[activeMeridian];
   const { left, right } = getSidePaths(m, side);
 
+  // 旧坐标系：600x900
+  // 新人体底图：375x768
+  const sx = 375 / 600;     // 0.625
+  const sy = 768 / 900;     // 0.853333...
+
   const strokeColor = m?.color || "#ff0000";
 
-  const clipId = side === "back" ? "clipBodyBack" : "clipBodyFront";
-  const clipD = side === "back" ? BODY_OUTLINE_BACK_D : BODY_OUTLINE_FRONT_D;
-
   const content = (
-    <g>
+    <g transform={`scale(${sx} ${sy})`}>
       {(left || []).map((d, i) => (
         <path
           key={`L${i}`}
@@ -68,25 +68,15 @@ export default function MeridianOverlay({ activeMeridian, side }) {
     </g>
   );
 
+  // 注意：overlay viewBox 改成跟人体一致：375x768
   return (
     <svg
-      viewBox="0 0 600 900"
+      viewBox="0 0 375 768"
       width="100%"
       height="100%"
       style={{ display: "block", position: "absolute", inset: 0, zIndex: 20, pointerEvents: "none" }}
     >
-      {USE_CLIP ? (
-        <>
-          <defs>
-            <clipPath id={clipId}>
-              <path d={clipD} />
-            </clipPath>
-          </defs>
-          <g clipPath={`url(#${clipId})`}>{content}</g>
-        </>
-      ) : (
-        content
-      )}
+      {content}
     </svg>
   );
 }
