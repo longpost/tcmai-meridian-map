@@ -11,14 +11,15 @@ export default function BodyMap() {
   const [lang, setLang] = useState("en"); // default English
   const [side, setSide] = useState("front");
   const [active, setActive] = useState("ST");
+
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // trace：默认不显示，点经络后显示
+  // Trace: only show after a meridian is clicked
   const [showTrace, setShowTrace] = useState(false);
   const [traceKey, setTraceKey] = useState(0);
 
-  // 参考层：显示你下载的那张“人+经络”SVG，帮你肉眼对齐
+  // Debug reference overlay (the downloaded “human+meridians” svg)
   const [showRef, setShowRef] = useState(false);
 
   async function fetchAnalysis(m) {
@@ -45,33 +46,34 @@ export default function BodyMap() {
     }
   }
 
-  function selectMeridian(m) {
-    const key = String(m).toUpperCase();
+  function selectMeridian(code) {
+    const k = String(code || "").toUpperCase();
 
-    // 点经络后再显示 trace
+    // show trace only after user action
     setShowTrace(true);
     setTraceKey((v) => v + 1);
 
-    // BL 自动切背面
-    if (key === "BL") {
+    // BL logic: auto switch to back
+    if (k === "BL") {
       setSide("back");
       setActive("BL");
       fetchAnalysis("BL");
       return;
     }
 
+    // non-BL: stay on front
     setSide("front");
-    setActive(key);
-    fetchAnalysis(key);
+    setActive(k);
+    fetchAnalysis(k);
   }
 
-  // 初始加载右侧解释（不自动显示 trace）
+  // Initial load: fetch right panel text, but DO NOT show trace automatically
   useEffect(() => {
     fetchAnalysis(active);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // 防止 front 还停留 BL
+  // If user switches to front while active=BL, fix it
   useEffect(() => {
     if (side === "front" && active === "BL") {
       setActive("ST");
@@ -84,13 +86,13 @@ export default function BodyMap() {
 
   const title =
     lang === "en"
-      ? analysis?.title_en || MERIDIANS[active]?.nameEn || active
-      : analysis?.title_zh || MERIDIANS[active]?.nameZh || active;
+      ? analysis?.title_en || MERIDIANS?.[active]?.nameEn || active
+      : analysis?.title_zh || MERIDIANS?.[active]?.nameZh || active;
 
   const explain =
     lang === "en"
-      ? analysis?.plain_explain_en || "Select a meridian to see details."
-      : analysis?.plain_explain_zh || "请选择经络查看说明。";
+      ? analysis?.plain_explain_en || "Click a meridian to see details."
+      : analysis?.plain_explain_zh || "点选经络查看说明。";
 
   const trace = lang === "en" ? analysis?.trace_en || [] : analysis?.trace_zh || [];
 
@@ -105,11 +107,11 @@ export default function BodyMap() {
       : { title: "推理回放", pause: "暂停", play: "播放", reset: "重置" };
 
   const traceHint =
-    lang === "en" ? "Click a meridian to show the trace." : "点选任意经络后，才显示推理回放。";
+    lang === "en" ? "Click any meridian to show the trace." : "点选任意经络后，才显示推理回放。";
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 420px", gap: 16, alignItems: "start" }}>
-      {/* LEFT: Map */}
+      {/* LEFT */}
       <div className="card">
         <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ fontWeight: 900 }}>{lang === "en" ? "Meridian Map" : "经络图"}</div>
@@ -131,7 +133,7 @@ export default function BodyMap() {
               className={`pill ${side === "back" ? "pillActive" : ""}`}
               onClick={() => {
                 setSide("back");
-                // 切背面不自动开 trace；只有点经络才开
+                // switching to back does NOT auto-show trace
                 if (active !== "BL") {
                   setActive("BL");
                   fetchAnalysis("BL");
@@ -143,7 +145,6 @@ export default function BodyMap() {
 
             <div style={{ width: 10 }} />
 
-            {/* 参考层开关 */}
             <button className={`pill ${showRef ? "pillActive" : ""}`} onClick={() => setShowRef((v) => !v)}>
               {lang === "en" ? "Show Ref" : "参考"}
             </button>
@@ -153,33 +154,14 @@ export default function BodyMap() {
         <div style={{ height: 10 }} />
 
         <div style={{ position: "relative", width: "100%", maxWidth: 560, margin: "0 auto", aspectRatio: "2 / 3" }}>
-          {/* Base body */}
+          {/* Body base */}
           <img
             src={side === "front" ? "/body/base_front.svg" : "/body/base_back.svg"}
             alt="body"
             style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
           />
 
-          {/* Debug reference overlay */}
-          {showRef && (
-            <img
-              src="/body/12meridians12shichen.svg"
-              alt="ref"
-              style={{
-                position: "absolute",
-                inset: 0,
-                width: "100%",
-                height: "100%",
-                objectFit: "contain",
-                opacity: 0.22,
-                pointerEvents: "none",
-                zIndex: 10
-              }}
-            />
-          )}
-
-
-          {/* Reference overlay: the downloaded meridian svg (human+meridians). For alignment/debug only. */}
+          {/* Reference overlay (for alignment only) */}
           {showRef && (
             <img
               src="/body/12meridians12shichen.svg"
@@ -197,12 +179,12 @@ export default function BodyMap() {
             />
           )}
 
-          {/* Meridian overlay (interactive highlight) */}
+          {/* Meridian highlight overlay */}
           <div style={{ position: "absolute", inset: 0, zIndex: 20 }}>
             <MeridianOverlay activeMeridian={active} side={side} />
           </div>
 
-          {/* Hotspots */}
+          {/* Click hotspots */}
           {HOTSPOTS.map((h) => (
             <HotspotButton
               key={h.id}
@@ -230,7 +212,7 @@ export default function BodyMap() {
         </div>
       </div>
 
-      {/* RIGHT: Explanation + Trace */}
+      {/* RIGHT */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <div className="card">
           <div style={{ fontSize: 18, fontWeight: 900 }}>
@@ -255,6 +237,7 @@ export default function BodyMap() {
 }
 
 function HotspotButton({ shape, onClick, active, title }) {
+  // HOTSPOTS assumed authored in 600x900 space (your original)
   const leftPct = (shape.x / 600) * 100;
   const topPct = (shape.y / 900) * 100;
   const wPct = (shape.w / 600) * 100;
@@ -275,7 +258,7 @@ function HotspotButton({ shape, onClick, active, title }) {
         border: active ? "1px solid rgba(17,24,39,0.18)" : "1px solid transparent",
         borderRadius: 12,
         cursor: "pointer",
-        zIndex: 30, // 保证点击层在最上
+        zIndex: 30,
       }}
     />
   );
