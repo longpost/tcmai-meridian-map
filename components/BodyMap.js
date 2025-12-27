@@ -160,6 +160,25 @@ export default function BodyMap() {
             style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
           />
 
+          {/* Debug reference overlay */}
+          {showRef && (
+            <img
+              src="/body/12meridians12shichen.svg"
+              alt="ref"
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                opacity: 0.22,
+                pointerEvents: "none",
+                zIndex: 10
+              }}
+            />
+          )}
+
+
           {/* Reference overlay: the downloaded meridian svg (human+meridians). For alignment/debug only. */}
           {showRef && (
             <img
