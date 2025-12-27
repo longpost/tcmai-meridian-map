@@ -14,10 +14,12 @@ export default function BodyMap() {
   const [analysis, setAnalysis] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // 控制“推理回放/trace”是否展示：默认不展示
+  // trace：默认不显示，点经络后显示
   const [showTrace, setShowTrace] = useState(false);
-  // 用于每次选经络都让 TracePlayer 重置
   const [traceKey, setTraceKey] = useState(0);
+
+  // 参考层：显示你下载的那张“人+经络”SVG，帮你肉眼对齐
+  const [showRef, setShowRef] = useState(false);
 
   async function fetchAnalysis(m) {
     setLoading(true);
@@ -50,6 +52,7 @@ export default function BodyMap() {
     setShowTrace(true);
     setTraceKey((v) => v + 1);
 
+    // BL 自动切背面
     if (key === "BL") {
       setSide("back");
       setActive("BL");
@@ -62,7 +65,7 @@ export default function BodyMap() {
     fetchAnalysis(key);
   }
 
-  // 初始只加载右侧解释，不显示 trace
+  // 初始加载右侧解释（不自动显示 trace）
   useEffect(() => {
     fetchAnalysis(active);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -102,12 +105,11 @@ export default function BodyMap() {
       : { title: "推理回放", pause: "暂停", play: "播放", reset: "重置" };
 
   const traceHint =
-    lang === "en"
-      ? "Click a meridian to show the trace."
-      : "点选任意经络后，才显示推理回放。";
+    lang === "en" ? "Click a meridian to show the trace." : "点选任意经络后，才显示推理回放。";
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 420px", gap: 16, alignItems: "start" }}>
+      {/* LEFT: Map */}
       <div className="card">
         <div style={{ display: "flex", gap: 8, alignItems: "center", justifyContent: "space-between" }}>
           <div style={{ fontWeight: 900 }}>{lang === "en" ? "Meridian Map" : "经络图"}</div>
@@ -138,23 +140,50 @@ export default function BodyMap() {
             >
               {lang === "en" ? "Back" : "背面"}
             </button>
+
+            <div style={{ width: 10 }} />
+
+            {/* 参考层开关 */}
+            <button className={`pill ${showRef ? "pillActive" : ""}`} onClick={() => setShowRef((v) => !v)}>
+              {lang === "en" ? "Show Ref" : "参考"}
+            </button>
           </div>
         </div>
 
         <div style={{ height: 10 }} />
 
         <div style={{ position: "relative", width: "100%", maxWidth: 560, margin: "0 auto", aspectRatio: "2 / 3" }}>
+          {/* Base body */}
           <img
             src={side === "front" ? "/body/base_front.svg" : "/body/base_back.svg"}
             alt="body"
             style={{ width: "100%", height: "100%", objectFit: "contain", display: "block" }}
           />
 
-          {/* Overlay 强制在上层 */}
+          {/* Reference overlay: the downloaded meridian svg (human+meridians). For alignment/debug only. */}
+          {showRef && (
+            <img
+              src="/body/12meridians12shichen.svg"
+              alt="meridian-ref"
+              style={{
+                position: "absolute",
+                inset: 0,
+                width: "100%",
+                height: "100%",
+                objectFit: "contain",
+                opacity: 0.22,
+                pointerEvents: "none",
+                zIndex: 10,
+              }}
+            />
+          )}
+
+          {/* Meridian overlay (interactive highlight) */}
           <div style={{ position: "absolute", inset: 0, zIndex: 20 }}>
             <MeridianOverlay activeMeridian={active} side={side} />
           </div>
 
+          {/* Hotspots */}
           {HOTSPOTS.map((h) => (
             <HotspotButton
               key={h.id}
@@ -177,9 +206,12 @@ export default function BodyMap() {
         </div>
 
         <div style={{ height: 8 }} />
-        <div className="smallMuted">{lang === "en" ? "Note: BL is shown on the back view only." : "注：BL 仅在背面显示。"}</div>
+        <div className="smallMuted">
+          {lang === "en" ? "Note: BL is shown on the back view only." : "注：BL 仅在背面显示。"}
+        </div>
       </div>
 
+      {/* RIGHT: Explanation + Trace */}
       <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
         <div className="card">
           <div style={{ fontSize: 18, fontWeight: 900 }}>
@@ -224,9 +256,9 @@ function HotspotButton({ shape, onClick, active, title }) {
         border: active ? "1px solid rgba(17,24,39,0.18)" : "1px solid transparent",
         borderRadius: 12,
         cursor: "pointer",
+        zIndex: 30, // 保证点击层在最上
       }}
     />
   );
 }
-
 
