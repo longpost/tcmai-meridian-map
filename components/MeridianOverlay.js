@@ -5,7 +5,7 @@ const STROKE_WIDTH = 2.2;
 
 // 这里挂外部资源：先试 LU
 const EXTERNAL = {
-  LU: { front: "/body/external/LU.svg" },
+  LU: { front: "/body/LU.svg" },
   // 以后你找到其它单经络SVG，就照这个加：
   // LI: { front: "/body/external/LI.svg" },
 };
