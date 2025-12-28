@@ -1,7 +1,14 @@
 import React from "react";
 import { MERIDIANS } from "../lib/meridians";
 
-const STROKE_WIDTH = 2.2; // 线更细：2 / 1.8 自己调
+const STROKE_WIDTH = 2.2;
+
+// 这里挂外部资源：先试 LU
+const EXTERNAL = {
+  LU: { front: "/body/external/LU.svg" },
+  // 以后你找到其它单经络SVG，就照这个加：
+  // LI: { front: "/body/external/LI.svg" },
+};
 
 function normalizePath(x) {
   if (!x) return null;
@@ -29,14 +36,37 @@ function getSidePaths(m, side) {
 }
 
 export default function MeridianOverlay({ activeMeridian, side }) {
-  const m = MERIDIANS?.[activeMeridian];
+  const k = String(activeMeridian || "").toUpperCase();
+
+  // 如果这个经络有外部资源，就直接叠加图片（最快试通）
+  const ext = EXTERNAL?.[k]?.[side];
+  if (ext) {
+    return (
+      <img
+        src={ext}
+        alt={`${k}-overlay`}
+        style={{
+          position: "absolute",
+          inset: 0,
+          width: "100%",
+          height: "100%",
+          objectFit: "contain",
+          pointerEvents: "none",
+          zIndex: 20,
+          opacity: 0.9,
+          // 让红线更“贴”在人身上（可删）
+          mixBlendMode: "multiply",
+        }}
+      />
+    );
+  }
+
+  // 否则走你原来的“paths”方式（仍然对准你的人体 viewBox）
+  const m = MERIDIANS?.[k];
   const { left, right } = getSidePaths(m, side);
 
-  // 旧经络坐标系：600x900
-  const sx = 375 / 600; // 0.625
-  const sy = 768 / 900; // 0.853333...
-
-  // 你的人体底图 viewBox
+  const sx = 375 / 600;
+  const sy = 768 / 900;
   const dx = side === "back" ? 371 : -4;
   const dy = 267;
 
@@ -49,17 +79,35 @@ export default function MeridianOverlay({ activeMeridian, side }) {
       height="100%"
       style={{ position: "absolute", inset: 0, zIndex: 20, pointerEvents: "none", display: "block" }}
     >
-      {/* x' = sx*x + dx, y' = sy*y + dy */}
       <g transform={`matrix(${sx},0,0,${sy},${dx},${dy})`}>
         {(left || []).map((d, i) => (
-          <path key={`L${i}`} d={d} fill="none" stroke={strokeColor} strokeWidth={STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round" opacity="0.92" />
+          <path
+            key={`L${i}`}
+            d={d}
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth={STROKE_WIDTH}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity="0.92"
+          />
         ))}
         {(right || []).map((d, i) => (
-          <path key={`R${i}`} d={d} fill="none" stroke={strokeColor} strokeWidth={STROKE_WIDTH} strokeLinecap="round" strokeLinejoin="round" opacity="0.92" />
+          <path
+            key={`R${i}`}
+            d={d}
+            fill="none"
+            stroke={strokeColor}
+            strokeWidth={STROKE_WIDTH}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            opacity="0.92"
+          />
         ))}
       </g>
     </svg>
   );
 }
+
 
 
